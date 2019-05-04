@@ -1,9 +1,4 @@
- #! /usr/bin/env python
-# -*- coding: utf-8 -*-
 
-
-__doc__ = """web server
-"""
 
 import json
 from flask import Flask, request, send_from_directory, Response
@@ -17,7 +12,8 @@ import db
 
 
 
-async_mode = None
+#async_mode = None
+
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'secret!'
@@ -73,10 +69,6 @@ def test_emit(message):
 
         socketio.sleep(3)
         
-
-def ack():
-    print("message received!")
-
 
 
 
