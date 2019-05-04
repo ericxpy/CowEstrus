@@ -7,3 +7,4 @@ Werkzeug==0.14.1
 Flask_SocketIO
 python-engineio
 python-socketio
+azure-cosmos
