@@ -8,9 +8,7 @@ __doc__ = """web server
 import json
 from flask import Flask, request, send_from_directory, Response
 from flask_socketio import SocketIO
-import random
 
-from flask_cors import CORS
 
 import sys
 sys.path.append("db/")
@@ -21,7 +19,7 @@ import db
 
 async_mode = None
 app = Flask(__name__)
-CORS(app)
+
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
