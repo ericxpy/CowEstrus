@@ -1,9 +1,4 @@
- #! /usr/bin/env python
-# -*- coding: utf-8 -*-
 
-
-__doc__ = """web server
-"""
 
 import json
 import threading
@@ -17,7 +12,7 @@ import db
 
 
 
-async_mode = None
+#async_mode = None
 app = Flask(__name__, template_folder='public')
 
 app.config['SECRET_KEY'] = 'secret!'
