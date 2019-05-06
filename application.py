@@ -118,16 +118,16 @@ def render_static(page_name):
 def senddata():
     data=db.getdata()
         
-    socketio.emit('cow_data', data)
+    socketio.emit('cow_data', data, namespace='/conn')
 
 
 
-@socketio.on('message')
+@socketio.on('message',namespace='/conn')
 def test_emit(message):
     print(message)
     
 
-    set_interval(senddata, 10)
+    set_interval(senddata, 5)
 
         
 
