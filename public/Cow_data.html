@@ -46,11 +46,23 @@
             <div id="main-menu" class="main-menu collapse navbar-collapse">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="/"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
+                        <a href="/" onclick="return disconnect();"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
                     </li>
 
                     <li>
-                        <a href="/search"> <i class="menu-icon fa fa-search"></i>Search </a>
+                        <a href="/search" onclick="return disconnect();"> <i class="menu-icon fa fa-search"></i>Search </a>
+                    </li>
+
+                    <li>
+                        <a href="/chart" onclick="return disconnect();"> <i class="menu-icon fa fa-bar-chart"></i>Chart </a>
+                    </li>
+
+                    <li>
+                        <a href="/update" onclick="return disconnect();"> <i class="menu-icon fa fa-cloud-upload"></i>Update ML Model</a>
+                    </li>
+
+                    <li>
+                        <a href="/probability" onclick="return disconnect();"><i class="menu-icon fa fa-line-chart"></i>Probability </a>
                     </li>
                     
                 </ul>
@@ -144,8 +156,8 @@
 
     
     <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-
+    <!-- <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script> -->
+    <script src="static/vendors/socket.io-client/dist/socket.io.js"></script>
     <script src="static/vendors/jquery/dist/jquery.min.js"></script>
     <script src="static/vendors/popper.js/dist/umd/popper.min.js"></script>
     <script src="static/vendors/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -167,20 +179,14 @@
     <script type="text/javascript">
 
         var $ =jQuery.noConflict();
-        namespace = '/conn';
-        var socket = io.connect('https://' + document.domain + ':' + location.port+namespace);
+        var socket = io();
 
         var callback = function(){
-            
-            
 
-            socket.on('connect',function(){
-                console.log("boxilai is connected!");
-                socket.emit('message',{'param':'————————————————————打黑除恶——————————————————'});
-            });
+            socket.emit('message',{'param': 'requestCowData'});
 
             socket.on('cow_data',function(data){
-
+                event.preventDefault();
                 console.log(data);
                 var table=document.getElementById("bootstrap-data-table-export")
 
@@ -199,8 +205,6 @@
                         var textnode=document.createTextNode(key);
                         th.appendChild(textnode);
                         tr.appendChild(th);
-
-
                     })
 
                     thead.appendChild(tr);      
@@ -226,6 +230,8 @@
 
                 table.appendChild(thead);
                 table.appendChild(tbody);
+
+                setTimeout(function() {socket.emit('message',{'param': 'requestCowData'});}, 2000);
                         
             });
         };
@@ -238,6 +244,13 @@
         } else {
         document.addEventListener("DOMContentLoaded", callback);
         }
+
+        function disconnect() {
+            console.log('stopTimer');
+            socket.emit('stopTimer');
+            return true;
+        }
+
         $(document).ready(function() {
             
         });

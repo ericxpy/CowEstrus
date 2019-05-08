@@ -1,4 +1,9 @@
+ #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
+
+__doc__ = """web server
+"""
 
 import json
 import threading
@@ -12,12 +17,11 @@ import db
 
 
 
-#async_mode = None
+async_mode = None
 app = Flask(__name__, template_folder='public')
 
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
-
 
 
 
@@ -28,20 +32,6 @@ socketio = SocketIO(app)
 # login_manager.init_app(app)
 
 # users = {'foo@bar.tld': {'password': 'secret'}}
-
-
-
-
-def set_interval(func, sec): 
-    def func_wrapper(): 
-        set_interval(func, sec)  
-        func()  
-    t = threading.Timer(sec, func_wrapper) 
-    t.start() 
-    return t
-
-
-
 
 # @login_manager.unauthorized_handler
 # def unauthorized_handler():
@@ -75,36 +65,74 @@ def set_interval(func, sec):
 #     return user
 
 
+def set_interval(func, sec): 
+    def func_wrapper(): 
+        set_interval(func, sec)  
+        func()  
+    t = threading.Timer(sec, func_wrapper) 
+    t.start() 
+    return t
 
+def senddata():
+    print("sending data")
+    data=db.getdata()   
+    socketio.emit('cow_data', data)
 
+timer = None
+@socketio.on('message')
+def test_emit(message):
+    senddata()
+    # timer = set_interval(senddata, 5)
 
+# timer = None
+# @socketio.on('message')
+# def test_emit(message):
+#     senddata()
+
+@socketio.on('connect', namespace='/chat')
+def test_connect():
+    print('Client connected')
 
 #Serve Static Index page
 @app.route('/')
 def api_index():
     return send_from_directory('public', 'Cow_data.html')
 
-
-@app.route('/search_cow',methods=['GET'])
-def Search_cow():
-
-    
-
+@app.route('/search_cow', methods=['GET'])
+def searchCow():
     cowID=request.args.get('ID')
-
-    
-
-    
-
+    print(cowID)
     data=db.search_cow_byID(int(cowID))
-
-
     return Response(json.dumps(data), mimetype='application/json')
 
 
+@app.route('/plot_cow',methods=['GET'])
+def plotCow():
+    cowID=request.args.get('ID')
+    print(cowID)
+    data=db.search_cow_byID(int(cowID))
+    data=data[len(data)-24:]
+    return Response(json.dumps(data), mimetype='application/json')
 
-    
+@app.route('/plot_prob',methods=['GET'])
+def plotProb():
+    cowID=request.args.get('ID')
+    print(cowID)
+    data=db.search_cow_probability_byID(int(cowID))
+    data=data[len(data)-24:]
+    return Response(json.dumps(data), mimetype='application/json')
 
+@app.route('/update_model',methods=['POST'])
+def updateModel():
+    parameters = request.json
+    msg = db.updateMLModel(parameters)
+    return Response(json.dumps(msg), mimetype='application/json')
+
+@app.route('/update_labels', methods=['POST'])
+def updateLabel():
+    print('update_labels')
+    db.updateLabelByRids(request.json)
+    return Response(json.dumps("update_labels_success"), mimetype='application/json')
 
 
 #Serve Other Static Pages
@@ -112,33 +140,27 @@ def Search_cow():
 def render_static(page_name):
     return send_from_directory('public', path)
 
- 
-
-
-def senddata():
-    data=db.getdata()
         
-    socketio.emit('cow_data', data, namespace='/conn')
-
-
-
-@socketio.on('message',namespace='/conn')
-def test_emit(message):
-    print(message)
-    
-
-    set_interval(senddata, 5)
-
-        
-
-
-
-
 
 @app.route('/search', methods=['GET', 'POST'])
 # @flask_login.login_required
-def search():
+def searchPage():
     return render_template('search.html')
+
+@app.route('/chart', methods=['GET', 'POST'])
+# @flask_login.login_required
+def chartPage():
+    return render_template('chart.html')
+
+@app.route('/update', methods=['GET', 'POST'])
+# @flask_login.login_required
+def updatePage():
+    return render_template('update.html')
+
+@app.route('/probability', methods=['GET', 'POST'])
+# @flask_login.login_required
+def probabilityPage():
+    return render_template('probability.html')
 
 # @app.route('/login', methods=['GET', 'POST'])
 # def login():
